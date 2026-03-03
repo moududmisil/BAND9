@@ -1,0 +1,7 @@
+{
+  "name": " ",
+  "description": "Premier overseas education consultancy and educational support services provider.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
