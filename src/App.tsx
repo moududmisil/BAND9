@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { jsPDF } from "jspdf";
 import { 
   GraduationCap, 
   Globe, 
@@ -29,7 +30,16 @@ import {
   Clock,
   Award,
   Shield,
-  Calendar
+  Calendar,
+  BriefcaseIcon,
+  Laptop,
+  Rocket,
+  Target,
+  Building2,
+  Handshake,
+  UserPlus,
+  TrendingUp,
+  DollarSign
 } from 'lucide-react';
 
 // --- Constants ---
@@ -72,6 +82,656 @@ const servicesData = [
     desc: "Professional training, skill development, and career counseling services. We help you map out your career path and prepare for the global job market."
   }
 ];
+
+const scholarshipsData = [
+  {
+    id: 1,
+    slug: "chevening-scholarships",
+    title: "Chevening Scholarships",
+    country: "UK",
+    amount: "Fully Funded",
+    level: "Master's",
+    desc: "The UK government's international awards program aimed at developing global leaders.",
+    eligibility: "Applicants from Chevening-eligible countries with a minimum of two years' work experience.",
+    link: "https://www.chevening.org/scholarships/",
+    content: {
+      overview: "Chevening is the UK government's international awards programme of the Foreign, Commonwealth & Development Office (FCDO) and partner organisations. The programme offers awards to study in the UK for one year on a fully funded master's degree course.",
+      benefits: [
+        "University tuition fees",
+        "A monthly stipend",
+        "Travel costs to and from the UK",
+        "An arrival allowance",
+        "A homeward departure allowance",
+        "The cost of one visa application",
+        "A travel grant to attend Chevening events in the UK"
+      ],
+      applicationProcess: "The application process for Chevening Scholarships takes approximately eight months from the application deadline to when applicants are conditionally selected for an award. Applications must be submitted through the Chevening online application system.",
+      requirements: [
+        "Be a citizen of a Chevening-eligible country or territory",
+        "Return to your country of citizenship for a minimum of two years after your award has ended",
+        "Have completed all components of an undergraduate degree",
+        "Have at least two years (equivalent to 2,800 hours) of work experience",
+        "Apply to three different eligible UK university courses and have received an unconditional offer from one of these choices"
+      ]
+    }
+  },
+  {
+    id: 2,
+    slug: "fulbright-foreign-student-program",
+    title: "Fulbright Foreign Student Program",
+    country: "USA",
+    amount: "Fully Funded",
+    level: "Master's/PhD",
+    desc: "Enables graduate students, young professionals and artists from abroad to study and conduct research in the US.",
+    eligibility: "Varies by country. Generally requires a strong academic background and leadership potential.",
+    link: "https://foreign.fulbrightonline.org/about/foreign-student-program",
+    content: {
+      overview: "The Fulbright Foreign Student Program enables graduate students, young professionals and artists from abroad to study and conduct research in the United States. The Fulbright Foreign Student Program operates in more than 160 countries worldwide.",
+      benefits: [
+        "Tuition and fees",
+        "Living stipend",
+        "Health insurance",
+        "Airfare",
+        "Professional development opportunities"
+      ],
+      applicationProcess: "Application details and grant terms for the Fulbright Foreign Student Program vary by country of citizenship. Interested applicants should consult the website of the Fulbright Commission or the Public Affairs Section of the U.S. Embassy in their home country.",
+      requirements: [
+        "Varies by country",
+        "Strong academic record",
+        "English language proficiency",
+        "Leadership potential",
+        "Commitment to cultural exchange"
+      ]
+    }
+  },
+  {
+    id: 3,
+    slug: "australia-awards",
+    title: "Australia Awards",
+    country: "Australia",
+    amount: "Fully Funded",
+    level: "Bachelor's/Master's/PhD",
+    desc: "Long-term awards administered by the Department of Foreign Affairs and Trade.",
+    eligibility: "Citizens of participating countries in Asia, the Pacific, the Middle East and Africa.",
+    link: "https://www.dfat.gov.au/people-to-people/australia-awards/australia-awards-scholarships",
+    content: {
+      overview: "Australia Awards Scholarships are long-term awards administered by the Department of Foreign Affairs and Trade. They aim to contribute to the development needs of Australia's partner countries in line with bilateral and regional agreements.",
+      benefits: [
+        "Full tuition fees",
+        "Return air travel",
+        "Establishment allowance",
+        "Contribution to Living Expenses (CLE)",
+        "Introductory Academic Program (IAP)",
+        "Overseas Student Health Cover (OSHC)"
+      ],
+      applicationProcess: "Applications are typically open from February to April each year. Applicants must apply online through the OASIS system or via mail if online application is not possible in their country.",
+      requirements: [
+        "Be at least 18 years of age",
+        "Be a citizen of a participating country",
+        "Not be a citizen of Australia",
+        "Satisfy the admission requirements of the institution",
+        "Satisfy all requirements of the Department of Home Affairs"
+      ]
+    }
+  },
+  {
+    id: 4,
+    slug: "vanier-canada-graduate-scholarships",
+    title: "Vanier Canada Graduate Scholarships",
+    country: "Canada",
+    amount: "$50,000 per year",
+    level: "PhD",
+    desc: "Aims to attract and retain world-class doctoral students and establish Canada as a global centre of excellence in research and higher learning.",
+    eligibility: "Canadian and international students pursuing a doctoral degree at a Canadian university.",
+    link: "https://vanier.gc.ca/en/home-accueil.html",
+    content: {
+      overview: "The Vanier Canada Graduate Scholarships (Vanier CGS) program was created to attract and retain world-class doctoral students and to establish Canada as a global centre of excellence in research and higher learning.",
+      benefits: [
+        "$50,000 per year for three years",
+        "Prestige and recognition",
+        "Networking opportunities",
+        "Support for high-impact research"
+      ],
+      applicationProcess: "Candidates must be nominated by a Canadian institution with a quota to host Vanier scholars. Candidates should contact the faculty of graduate studies at their selected Canadian institution.",
+      requirements: [
+        "Be nominated by only one Canadian institution",
+        "Be pursuing a first doctoral degree",
+        "Intend to pursue full-time doctoral studies",
+        "Have achieved a first-class average in each of the last two years of full-time study",
+        "Demonstrate strong leadership skills and high standard of scholarly achievement"
+      ]
+    }
+  },
+  {
+    id: 5,
+    slug: "daad-scholarships",
+    title: "DAAD Scholarships",
+    country: "Germany",
+    amount: "Monthly stipend + Travel",
+    level: "Master's/PhD",
+    desc: "Offers a wide range of scholarships for international students to study in Germany.",
+    eligibility: "Graduates with at least two years' professional experience.",
+    link: "https://www.daad.de/en/study-and-research-in-germany/scholarships/",
+    content: {
+      overview: "DAAD scholarships offer foreign graduates from development and newly industrialised countries from all disciplines and with at least two years' professional experience the chance to take a postgraduate or Master's degree at a state or state-recognised German university.",
+      benefits: [
+        "Monthly payments of 934 euros for graduates or 1,200 euros for doctoral candidates",
+        "Payments towards health, accident and personal liability insurance cover",
+        "Travel allowance",
+        "One-off study allowance"
+      ],
+      applicationProcess: "Applications are submitted online through the DAAD portal. Deadlines vary depending on the chosen study program and the applicant's home country.",
+      requirements: [
+        "Bachelor's degree in an appropriate subject",
+        "At least two years of professional experience",
+        "Academic degrees should normally not be more than six years old",
+        "English or German language skills depending on the program"
+      ]
+    }
+  },
+  {
+    id: 6,
+    slug: "erasmus-mundus-joint-masters",
+    title: "Erasmus Mundus Joint Masters",
+    country: "Europe",
+    amount: "Fully Funded",
+    level: "Master's",
+    desc: "High-level integrated study programmes, at master level, delivered by an international partnership of higher education institutions.",
+    eligibility: "Students from all over the world can apply.",
+    link: "https://erasmus-plus.ec.europa.eu/opportunities/opportunities-for-individuals/students/erasmus-mundus-joint-masters",
+    content: {
+      overview: "Erasmus Mundus Joint Masters are high-level integrated study programmes, at master level, delivered by an international partnership of higher education institutions. They involve at least three institutions from at least three different countries.",
+      benefits: [
+        "Full scholarship covering tuition fees",
+        "Insurance",
+        "Travel costs",
+        "Installation costs",
+        "Monthly subsistence allowance"
+      ],
+      applicationProcess: "Students apply directly to the consortium delivering the programme. You can consult the online catalogue of Erasmus Mundus Master Programmes to find the one that interests you.",
+      requirements: [
+        "Have a first higher education degree or equivalent",
+        "Not have already benefited from an EMJM scholarship",
+        "English language proficiency",
+        "Specific requirements set by the individual program consortium"
+      ]
+    }
+  }
+];
+
+const ScholarshipDetailPage = ({ slug, onBack }: { slug: string, onBack: () => void }) => {
+  const scholarship = scholarshipsData.find(s => s.slug === slug);
+
+  if (!scholarship) return <div>Scholarship not found</div>;
+
+  const handleDownload = () => {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    
+    // Header
+    doc.setFillColor(220, 38, 38); // Red-600
+    doc.rect(0, 0, pageWidth, 40, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(24);
+    doc.text("Band9 Edu", 20, 25);
+    doc.setFontSize(12);
+    doc.text("Your Gateway to Global Education", 20, 33);
+    
+    // Scholarship Title
+    doc.setTextColor(31, 41, 55); // Gray-800
+    doc.setFontSize(20);
+    doc.text(scholarship.title, 20, 60);
+    
+    // Details
+    doc.setFontSize(12);
+    doc.setTextColor(75, 85, 99); // Gray-600
+    doc.text(`Country: ${scholarship.country}`, 20, 70);
+    doc.text(`Level: ${scholarship.level}`, 20, 77);
+    doc.text(`Amount: ${scholarship.amount}`, 20, 84);
+    
+    // Overview
+    doc.setFontSize(16);
+    doc.setTextColor(31, 41, 55);
+    doc.text("Overview", 20, 100);
+    doc.setFontSize(11);
+    doc.setTextColor(75, 85, 99);
+    const overviewLines = doc.splitTextToSize(scholarship.content.overview, pageWidth - 40);
+    doc.text(overviewLines, 20, 108);
+    
+    let currentY = 108 + (overviewLines.length * 5) + 10;
+    
+    // Benefits
+    doc.setFontSize(16);
+    doc.setTextColor(31, 41, 55);
+    doc.text("Key Benefits", 20, currentY);
+    doc.setFontSize(11);
+    doc.setTextColor(75, 85, 99);
+    currentY += 8;
+    scholarship.content.benefits.forEach((benefit: string) => {
+      doc.text(`• ${benefit}`, 25, currentY);
+      currentY += 6;
+    });
+    
+    currentY += 10;
+    
+    // Requirements
+    doc.setFontSize(16);
+    doc.setTextColor(31, 41, 55);
+    doc.text("Requirements", 20, currentY);
+    doc.setFontSize(11);
+    doc.setTextColor(75, 85, 99);
+    currentY += 8;
+    scholarship.content.requirements.forEach((req: string, index: number) => {
+      const reqLines = doc.splitTextToSize(`${index + 1}. ${req}`, pageWidth - 45);
+      if (currentY + (reqLines.length * 5) > 260) {
+        doc.addPage();
+        currentY = 20;
+      }
+      doc.text(reqLines, 25, currentY);
+      currentY += (reqLines.length * 5) + 2;
+    });
+
+    // Footer / Ads
+    const footerY = doc.internal.pageSize.getHeight() - 30;
+    doc.setFillColor(249, 250, 251); // Gray-50
+    doc.rect(0, footerY, pageWidth, 30, 'F');
+    doc.setTextColor(31, 41, 55);
+    doc.setFontSize(10);
+    doc.text("Contact Band9 Edu for expert scholarship guidance and visa facilitation.", pageWidth / 2, footerY + 12, { align: 'center' });
+    doc.setTextColor(220, 38, 38);
+    doc.text("www.band9edu.com | +880 1234 567890", pageWidth / 2, footerY + 20, { align: 'center' });
+    
+    doc.save(`${scholarship.slug}-guide.pdf`);
+  };
+
+  return (
+    <div className="pt-32 pb-24 bg-white min-h-screen">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <button 
+          onClick={onBack}
+          className="flex items-center gap-2 text-red-600 font-bold mb-8 hover:gap-3 transition-all group"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          Back to Scholarships
+        </button>
+
+        <div className="mb-12">
+          <div className="bg-red-50 text-red-600 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider inline-block mb-6">
+            {scholarship.country}
+          </div>
+          <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6 leading-tight">{scholarship.title}</h1>
+          <div className="flex flex-wrap gap-6 text-gray-600">
+            <div className="flex items-center gap-2">
+              <GraduationCap className="w-5 h-5 text-red-600" />
+              <span className="font-medium">{scholarship.level}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="w-5 h-5 text-red-600" />
+              <span className="font-bold text-gray-900">{scholarship.amount}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="prose prose-lg max-w-none">
+          <section className="mb-12">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-3">
+              <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center text-red-600">
+                <BookOpen className="w-5 h-5" />
+              </div>
+              Overview
+            </h2>
+            <p className="text-gray-600 leading-relaxed">{scholarship.content.overview}</p>
+          </section>
+
+          <section className="mb-12 bg-gray-50 p-8 rounded-3xl border border-gray-100">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+              <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center text-red-600">
+                <Award className="w-5 h-5" />
+              </div>
+              Key Benefits
+            </h2>
+            <ul className="grid sm:grid-cols-2 gap-4">
+              {scholarship.content.benefits.map((benefit, i) => (
+                <li key={i} className="flex items-start gap-3 text-gray-600">
+                  <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                  <span>{benefit}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          <section className="mb-12">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-3">
+              <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center text-red-600">
+                <Users className="w-5 h-5" />
+              </div>
+              Eligibility Requirements
+            </h2>
+            <div className="space-y-4">
+              {scholarship.content.requirements.map((req, i) => (
+                <div key={i} className="flex items-start gap-4 p-4 bg-white border border-gray-100 rounded-xl shadow-sm">
+                  <div className="w-6 h-6 bg-red-50 text-red-600 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
+                    {i + 1}
+                  </div>
+                  <p className="text-gray-600">{req}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="mb-12">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-3">
+              <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center text-red-600">
+                <Calendar className="w-5 h-5" />
+              </div>
+              Application Process
+            </h2>
+            <p className="text-gray-600 leading-relaxed mb-8">{scholarship.content.applicationProcess}</p>
+            
+            <div className="flex flex-col sm:flex-row gap-4">
+              <button 
+                onClick={() => window.open(scholarship.link, '_blank')}
+                className="bg-red-600 text-white px-8 py-4 rounded-xl font-bold hover:bg-red-700 transition-all flex items-center justify-center gap-2 shadow-xl shadow-red-100"
+              >
+                Apply on Official Website <ArrowRight className="w-5 h-5" />
+              </button>
+              <button 
+                onClick={handleDownload}
+                className="bg-white text-gray-900 border border-gray-200 px-8 py-4 rounded-xl font-bold hover:bg-gray-50 transition-all"
+              >
+                Download Guide
+              </button>
+            </div>
+          </section>
+        </div>
+
+        {/* Sidebar-like CTA */}
+        <div className="mt-16 p-8 bg-gray-900 rounded-3xl text-white relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-red-600/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+          <div className="relative z-10">
+            <h3 className="text-2xl font-bold mb-4">Need help with your application?</h3>
+            <p className="text-gray-400 mb-8">Our expert consultants provide personalized guidance for {scholarship.title} and other global scholarships.</p>
+            <button className="bg-red-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-red-700 transition-all">
+              Book Free Consultation
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ScholarshipsPage = ({ onBack, onNavigate }: { onBack: () => void, onNavigate: (page: string, param?: string) => void }) => {
+  const [filter, setFilter] = useState('All');
+  const countries = ['All', 'UK', 'USA', 'Canada', 'Australia', 'Germany', 'Europe'];
+
+  const filteredScholarships = filter === 'All' 
+    ? scholarshipsData 
+    : scholarshipsData.filter(s => s.country === filter);
+
+  return (
+    <div className="pt-32 pb-24 bg-gray-50 min-h-screen">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <button 
+          onClick={onBack}
+          className="flex items-center gap-2 text-red-600 font-bold mb-8 hover:gap-3 transition-all group"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          Back
+        </button>
+
+        <div className="text-center mb-16">
+          <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 mb-6">International <span className="text-red-600">Scholarships</span></h1>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Explore fully-funded and partial scholarships to support your global education journey.
+          </p>
+        </div>
+
+        {/* Filters */}
+        <div className="flex flex-wrap justify-center gap-4 mb-12">
+          {countries.map((country) => (
+            <button
+              key={country}
+              onClick={() => setFilter(country)}
+              className={`px-6 py-2 rounded-full font-medium transition-all ${
+                filter === country 
+                ? 'bg-red-600 text-white shadow-lg shadow-red-200' 
+                : 'bg-white text-gray-600 border border-gray-200 hover:border-red-600 hover:text-red-600'
+              }`}
+            >
+              {country}
+            </button>
+          ))}
+        </div>
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {filteredScholarships.map((scholarship) => (
+            <motion.div
+              key={scholarship.id}
+              layout
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm hover:shadow-xl transition-all group flex flex-col"
+            >
+              <div className="flex justify-between items-start mb-6">
+                <div className="bg-red-50 text-red-600 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+                  {scholarship.country}
+                </div>
+                <div className="text-gray-400">
+                  <Award className="w-6 h-6" />
+                </div>
+              </div>
+              
+              <h3 className="text-xl font-bold text-gray-900 mb-4 group-hover:text-red-600 transition-colors">
+                {scholarship.title}
+              </h3>
+              
+              <div className="space-y-3 mb-6 flex-grow">
+                <div className="flex items-center gap-2 text-sm text-gray-500">
+                  <GraduationCap className="w-4 h-4 text-red-600" />
+                  <span className="font-medium">{scholarship.level}</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-gray-500">
+                  <ShieldCheck className="w-4 h-4 text-red-600" />
+                  <span className="font-bold text-gray-900">{scholarship.amount}</span>
+                </div>
+                <p className="text-sm text-gray-600 leading-relaxed mt-4">
+                  {scholarship.desc}
+                </p>
+              </div>
+
+              <div className="pt-6 border-t border-gray-50 mt-auto">
+                <div className="text-xs text-gray-400 uppercase tracking-widest mb-4">Eligibility</div>
+                <p className="text-xs text-gray-500 mb-6 italic">
+                  {scholarship.eligibility}
+                </p>
+                <div className="flex flex-col gap-3">
+                  <button 
+                    onClick={() => window.open(scholarship.link, '_blank')}
+                    className="w-full bg-red-600 text-white py-3 rounded-xl font-bold hover:bg-red-700 transition-all flex items-center justify-center gap-2 group/btn shadow-lg shadow-red-100"
+                  >
+                    Apply Now <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                  </button>
+                  <button 
+                    onClick={() => onNavigate('scholarship-detail', scholarship.slug)}
+                    className="w-full bg-white text-gray-700 border border-gray-200 py-3 rounded-xl font-bold hover:bg-gray-50 transition-all flex items-center justify-center gap-2"
+                  >
+                    View Details
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* CTA */}
+        <div className="mt-24 bg-red-600 rounded-[3rem] p-12 lg:p-20 text-center text-white relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2"></div>
+          <h2 className="text-4xl font-bold mb-6 relative z-10">Need Help with Scholarship Applications?</h2>
+          <p className="text-white/80 text-lg max-w-2xl mx-auto mb-10 relative z-10">
+            Our experts have helped thousands of students secure fully-funded scholarships. Get a free consultation today.
+          </p>
+          <button className="bg-white text-red-600 px-10 py-4 rounded-xl font-bold hover:bg-gray-100 transition-all shadow-2xl text-lg relative z-10">
+            Talk with Scholarship Expert
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const courseDetailsData: Record<string, any> = {
+  "Digital Marketing": {
+    title: "Digital Marketing",
+    icon: <Target className="w-12 h-12" />,
+    desc: "Master SEO, SEM, and Social Media strategies to drive business growth in the digital age.",
+    duration: "12 Weeks",
+    level: "Intermediate",
+    salaryRange: "$35,000 - $75,000 per year",
+    modules: [
+      "Introduction to Digital Marketing",
+      "Search Engine Optimization (SEO)",
+      "Search Engine Marketing (SEM)",
+      "Social Media Marketing",
+      "Content Marketing Strategy",
+      "Email Marketing & Automation",
+      "Web Analytics & Reporting"
+    ],
+    outcomes: [
+      "Develop comprehensive digital marketing strategies",
+      "Optimize websites for search engines",
+      "Manage successful paid advertising campaigns",
+      "Build and engage social media communities",
+      "Analyze marketing data to improve ROI"
+    ],
+    opportunities: ["SEO Specialist", "Social Media Manager", "Content Strategist", "Digital Marketing Executive", "PPC Expert"]
+  },
+  "Online MBA": {
+    title: "Online MBA",
+    icon: <GraduationCap className="w-12 h-12" />,
+    desc: "Global business management and leadership program designed for working professionals.",
+    duration: "24 Months",
+    level: "Advanced",
+    salaryRange: "$60,000 - $120,000 per year",
+    modules: [
+      "Leadership and Organizational Behavior",
+      "Financial Management",
+      "Marketing Management",
+      "Strategic Management",
+      "Operations and Supply Chain",
+      "Entrepreneurship and Innovation",
+      "Global Business Environment"
+    ],
+    outcomes: [
+      "Develop strategic leadership skills",
+      "Master financial decision-making",
+      "Understand global market dynamics",
+      "Build a strong professional network",
+      "Enhance career prospects in management"
+    ],
+    opportunities: ["Business Development Manager", "Operations Manager", "Strategic Consultant", "Project Manager", "Marketing Director"]
+  },
+  "Web Development": {
+    title: "Web Development",
+    icon: <Laptop className="w-12 h-12" />,
+    desc: "Full-stack development with modern frameworks and best practices.",
+    duration: "16 Weeks",
+    level: "Beginner to Intermediate",
+    salaryRange: "$45,000 - $95,000 per year",
+    modules: [
+      "HTML5 & CSS3 Fundamentals",
+      "Modern JavaScript (ES6+)",
+      "React.js & State Management",
+      "Node.js & Express Backend",
+      "Database Design (SQL & NoSQL)",
+      "API Development & Integration",
+      "Deployment & Cloud Services"
+    ],
+    outcomes: [
+      "Build responsive and interactive websites",
+      "Develop full-stack web applications",
+      "Master modern frontend frameworks",
+      "Implement secure backend systems",
+      "Understand web performance and SEO"
+    ],
+    opportunities: ["Frontend Developer", "Backend Developer", "Full-stack Engineer", "Web Architect", "Software Developer"]
+  },
+  "Graphic Design": {
+    title: "Graphic Design",
+    icon: <Award className="w-12 h-12" />,
+    desc: "Visual storytelling and creative branding using industry-standard tools.",
+    duration: "10 Weeks",
+    level: "Beginner",
+    salaryRange: "$30,000 - $65,000 per year",
+    modules: [
+      "Design Principles & Theory",
+      "Adobe Photoshop Mastery",
+      "Adobe Illustrator for Vector Art",
+      "Typography & Color Theory",
+      "Branding & Identity Design",
+      "UI/UX Design Basics",
+      "Portfolio Development"
+    ],
+    outcomes: [
+      "Create professional visual content",
+      "Design compelling brand identities",
+      "Master industry-standard design tools",
+      "Understand visual communication",
+      "Build a professional design portfolio"
+    ],
+    opportunities: ["Graphic Designer", "Brand Identity Designer", "UI/UX Designer", "Creative Director", "Illustrator"]
+  },
+  "Data Analytics": {
+    title: "Data Analytics",
+    icon: <Search className="w-12 h-12" />,
+    desc: "Mastering data visualization and insights to drive data-informed decisions.",
+    duration: "14 Weeks",
+    level: "Intermediate",
+    salaryRange: "$50,000 - $100,000 per year",
+    modules: [
+      "Statistics for Data Analysis",
+      "Excel for Data Professionals",
+      "SQL for Data Extraction",
+      "Python for Data Science",
+      "Data Visualization with Tableau",
+      "Machine Learning Basics",
+      "Business Intelligence Reporting"
+    ],
+    outcomes: [
+      "Analyze complex datasets for insights",
+      "Create interactive data dashboards",
+      "Master SQL and Python for data",
+      "Communicate data-driven stories",
+      "Apply statistical methods to business"
+    ],
+    opportunities: ["Data Analyst", "Business Intelligence Analyst", "Data Scientist", "Market Research Analyst", "Operations Analyst"]
+  },
+  "Cyber Security": {
+    title: "Cyber Security",
+    icon: <Shield className="w-12 h-12" />,
+    desc: "Protecting digital assets and networks from evolving cyber threats.",
+    duration: "20 Weeks",
+    level: "Intermediate to Advanced",
+    salaryRange: "$55,000 - $110,000 per year",
+    modules: [
+      "Network Security Fundamentals",
+      "Ethical Hacking & Penetration Testing",
+      "Cryptography & Data Protection",
+      "Incident Response & Management",
+      "Cloud Security Best Practices",
+      "Security Compliance & Auditing",
+      "Digital Forensics"
+    ],
+    outcomes: [
+      "Identify and mitigate security risks",
+      "Perform vulnerability assessments",
+      "Secure network infrastructures",
+      "Respond to cyber security incidents",
+      "Understand global security standards"
+    ],
+    opportunities: ["Security Analyst", "Ethical Hacker", "Security Consultant", "Network Security Engineer", "Information Security Manager"]
+  }
+};
 
 const languagePrepData = [
   {
@@ -179,10 +839,743 @@ const languagePrepData = [
 
 // --- Components ---
 
+const CareerPage = ({ onNavigate, onBack }: { onNavigate: (page: string) => void, onBack: () => void }) => {
+  return (
+    <div className="pt-32 pb-24 bg-gray-50 min-h-screen">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <button 
+          onClick={onBack}
+          className="flex items-center gap-2 text-red-600 font-bold mb-8 hover:gap-3 transition-all group"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          Back
+        </button>
+
+        <div className="text-center mb-16">
+          <motion.h1 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-4xl lg:text-6xl font-bold text-gray-900 mb-6"
+          >
+            Build Your <span className="text-red-600">Future</span>
+          </motion.h1>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Whether you're looking to gain new skills or find your dream job, we're here to support your career journey.
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          <motion.div 
+            whileHover={{ y: -10, scale: 1.02 }}
+            onClick={() => onNavigate('training')}
+            className="relative p-10 rounded-3xl shadow-xl border border-gray-100 cursor-pointer group overflow-hidden hover:shadow-2xl transition-all h-[400px] flex flex-col justify-end"
+          >
+            {/* Video Background */}
+            <div className="absolute inset-0 z-0">
+              <video 
+                autoPlay 
+                muted 
+                loop 
+                playsInline 
+                className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
+              >
+                <source src="https://assets.mixkit.co/videos/preview/mixkit-man-working-on-his-laptop-in-a-coffee-shop-40036-large.mp4" type="video/mp4" />
+              </video>
+              <div className="absolute inset-0 bg-white/90 group-hover:bg-black/40 transition-colors duration-500" />
+              <div className="absolute inset-0 bg-gradient-to-t from-white via-white/50 to-transparent group-hover:from-black/80 group-hover:via-black/20 group-hover:to-transparent transition-all duration-500" />
+            </div>
+
+            <div className="relative z-10">
+              <div className="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center text-red-600 mb-8 group-hover:bg-red-600 group-hover:text-white transition-all duration-500">
+                <Laptop className="w-8 h-8" />
+              </div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-4 group-hover:text-white transition-colors duration-500">Training</h2>
+              <p className="text-gray-600 mb-8 group-hover:text-gray-200 transition-colors duration-500">Master in-demand skills with our professional certification courses designed for global careers.</p>
+              <div className="flex items-center gap-2 text-red-600 font-bold group-hover:text-white">
+                Explore Courses <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
+              </div>
+            </div>
+          </motion.div>
+
+          <motion.div 
+            whileHover={{ y: -10, scale: 1.02 }}
+            onClick={() => onNavigate('jobs')}
+            className="relative p-10 rounded-3xl shadow-xl border border-gray-100 cursor-pointer group overflow-hidden hover:shadow-2xl transition-all h-[400px] flex flex-col justify-end"
+          >
+            {/* Video Background */}
+            <div className="absolute inset-0 z-0">
+              <video 
+                autoPlay 
+                muted 
+                loop 
+                playsInline 
+                className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
+              >
+                <source src="https://assets.mixkit.co/videos/preview/mixkit-business-people-shaking-hands-in-a-meeting-40037-large.mp4" type="video/mp4" />
+              </video>
+              <div className="absolute inset-0 bg-white/90 group-hover:bg-black/40 transition-colors duration-500" />
+              <div className="absolute inset-0 bg-gradient-to-t from-white via-white/50 to-transparent group-hover:from-black/80 group-hover:via-black/20 group-hover:to-transparent transition-all duration-500" />
+            </div>
+
+            <div className="relative z-10">
+              <div className="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center text-red-600 mb-8 group-hover:bg-red-600 group-hover:text-white transition-all duration-500">
+                <BriefcaseIcon className="w-8 h-8" />
+              </div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-4 group-hover:text-white transition-colors duration-500">Jobs</h2>
+              <p className="text-gray-600 mb-8 group-hover:text-gray-200 transition-colors duration-500">Find exciting career opportunities and internships within Band9 Edu and our partner network.</p>
+              <div className="flex items-center gap-2 text-red-600 font-bold group-hover:text-white">
+                View Vacancies <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const TrainingPage = ({ onNavigate, onBack }: { onNavigate: (page: string, param?: string) => void, onBack: () => void }) => {
+  const courses = [
+    { 
+      title: "Digital Marketing", 
+      icon: <Target className="w-6 h-6" />, 
+      desc: "Master SEO, SEM, and Social Media strategies.",
+      videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-digital-marketing-specialist-working-on-a-laptop-40030-large.mp4"
+    },
+    { 
+      title: "Online MBA", 
+      icon: <GraduationCap className="w-6 h-6" />, 
+      desc: "Global business management and leadership.",
+      videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-businessman-working-on-his-laptop-in-the-office-40031-large.mp4"
+    },
+    { 
+      title: "Web Development", 
+      icon: <Laptop className="w-6 h-6" />, 
+      desc: "Full-stack development with modern frameworks.",
+      videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-hands-of-a-man-typing-on-a-computer-keyboard-40032-large.mp4"
+    },
+    { 
+      title: "Graphic Design", 
+      icon: <Award className="w-6 h-6" />, 
+      desc: "Visual storytelling and creative branding.",
+      videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-graphic-designer-working-on-a-digital-tablet-40033-large.mp4"
+    },
+    { 
+      title: "Data Analytics", 
+      icon: <Search className="w-6 h-6" />, 
+      desc: "Mastering data visualization and insights.",
+      videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-data-analysis-on-a-laptop-screen-40034-large.mp4"
+    },
+    { 
+      title: "Cyber Security", 
+      icon: <Shield className="w-6 h-6" />, 
+      desc: "Protecting digital assets and networks.",
+      videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-hacker-typing-on-a-laptop-40035-large.mp4"
+    }
+  ];
+
+  const partners = ["Google", "Microsoft", "Amazon", "Meta", "IBM", "Salesforce"];
+
+  return (
+    <div className="pt-32 pb-24 bg-white min-h-screen">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <button 
+          onClick={onBack}
+          className="flex items-center gap-2 text-red-600 font-bold mb-8 hover:gap-3 transition-all group"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          Back
+        </button>
+
+        <div className="grid lg:grid-cols-2 gap-16 items-center mb-24">
+          <motion.div
+            initial={{ opacity: 0, x: -50 }}
+            animate={{ opacity: 1, x: 0 }}
+          >
+            <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 mb-8 leading-tight">
+              Get Trained, <br />
+              <span className="text-red-600">Get Hired.</span>
+            </h1>
+            <p className="text-xl text-gray-600 mb-8 leading-relaxed">
+              Our training programs are designed by industry experts to make you job-ready. We don't just teach; we assist you in securing your dream role.
+            </p>
+            <div className="space-y-4 mb-8">
+              <div className="flex items-center gap-3 text-gray-700 font-medium">
+                <CheckCircle2 className="w-6 h-6 text-green-500" />
+                <span>100% Job Placement Assistance</span>
+              </div>
+              <div className="flex items-center gap-3 text-gray-700 font-medium">
+                <CheckCircle2 className="w-6 h-6 text-green-500" />
+                <span>Industry-Recognized Certifications</span>
+              </div>
+              <div className="flex items-center gap-3 text-gray-700 font-medium">
+                <CheckCircle2 className="w-6 h-6 text-green-500" />
+                <span>Real-World Project Experience</span>
+              </div>
+            </div>
+            <button className="bg-red-600 text-white px-10 py-4 rounded-2xl font-bold hover:bg-red-700 transition-all shadow-xl shadow-red-100">
+              Enroll Now
+            </button>
+          </motion.div>
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="relative"
+          >
+            <div className="absolute inset-0 bg-red-600 rounded-[40px] rotate-6 opacity-10"></div>
+            <img 
+              src="https://picsum.photos/seed/training/800/600" 
+              alt="Training" 
+              className="relative z-10 rounded-[40px] shadow-2xl"
+              referrerPolicy="no-referrer"
+            />
+          </motion.div>
+        </div>
+
+        <div className="mb-24">
+          <h2 className="text-3xl font-bold text-gray-900 mb-12 text-center">Our Professional Courses</h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {courses.map((course, i) => (
+              <motion.div 
+                key={i}
+                whileHover={{ y: -10, scale: 1.02 }}
+                className="relative p-8 rounded-3xl border border-gray-100 overflow-hidden group transition-all h-[350px] flex flex-col justify-end"
+              >
+                {/* Video Background */}
+                <div className="absolute inset-0 z-0">
+                  <video 
+                    autoPlay 
+                    muted 
+                    loop 
+                    playsInline 
+                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
+                  >
+                    <source src={course.videoUrl} type="video/mp4" />
+                  </video>
+                  {/* Overlays */}
+                  <div className="absolute inset-0 bg-white/90 group-hover:bg-black/40 transition-colors duration-500" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-white via-white/50 to-transparent group-hover:from-black/80 group-hover:via-black/20 group-hover:to-transparent transition-all duration-500" />
+                </div>
+
+                <div className="relative z-10">
+                  <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center text-red-600 mb-6 group-hover:bg-red-600 group-hover:text-white transition-all duration-500">
+                    {course.icon}
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-white transition-colors duration-500">{course.title}</h3>
+                  <p className="text-gray-600 mb-6 group-hover:text-gray-200 transition-colors duration-500 line-clamp-2">{course.desc}</p>
+                  <button 
+                    onClick={() => onNavigate('course-details', course.title)}
+                    className="text-red-600 font-bold flex items-center gap-2 hover:gap-3 transition-all group-hover:text-white"
+                  >
+                    Course Details <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-gray-900 rounded-[40px] p-12 lg:p-20 text-white relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-full opacity-10">
+            <div className="absolute top-10 left-10 w-64 h-64 bg-red-600 rounded-full blur-3xl"></div>
+            <div className="absolute bottom-10 right-10 w-64 h-64 bg-red-600 rounded-full blur-3xl"></div>
+          </div>
+          <div className="relative z-10 text-center">
+            <h2 className="text-3xl lg:text-4xl font-bold mb-8">Our Global Partnerships</h2>
+            <p className="text-gray-400 mb-12 max-w-2xl mx-auto">We have partnered with leading tech giants and global corporations to provide our students with exclusive job opportunities.</p>
+            <div className="flex flex-wrap justify-center gap-8 lg:gap-16">
+              {partners.map((partner) => (
+                <div key={partner} className="text-2xl font-bold text-gray-500 hover:text-white transition-colors cursor-default">
+                  {partner}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const CourseDetailsPage = ({ courseTitle, onBack }: { courseTitle: string, onBack: () => void }) => {
+  const course = courseDetailsData[courseTitle];
+
+  if (!course) return null;
+
+  return (
+    <div className="pt-32 pb-24 bg-white min-h-screen">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <button 
+          onClick={onBack}
+          className="flex items-center gap-2 text-red-600 font-bold mb-8 hover:gap-3 transition-all group"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          Back to Training
+        </button>
+
+        <div className="grid lg:grid-cols-2 gap-16 items-start mb-24">
+          <motion.div
+            initial={{ opacity: 0, x: -50 }}
+            animate={{ opacity: 1, x: 0 }}
+          >
+            <div className="w-20 h-20 bg-red-50 rounded-2xl flex items-center justify-center text-red-600 mb-8">
+              {course.icon}
+            </div>
+            <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+              {course.title}
+            </h1>
+            <p className="text-xl text-gray-600 mb-8 leading-relaxed">
+              {course.desc}
+            </p>
+            
+            <div className="flex flex-wrap gap-6 mb-12">
+              <div className="flex items-center gap-3 bg-gray-50 px-6 py-3 rounded-2xl border border-gray-100">
+                <Clock className="w-5 h-5 text-red-600" />
+                <div>
+                  <p className="text-xs text-gray-500 uppercase font-bold">Duration</p>
+                  <p className="text-gray-900 font-bold">{course.duration}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 bg-gray-50 px-6 py-3 rounded-2xl border border-gray-100">
+                <Target className="w-5 h-5 text-red-600" />
+                <div>
+                  <p className="text-xs text-gray-500 uppercase font-bold">Level</p>
+                  <p className="text-gray-900 font-bold">{course.level}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 bg-gray-50 px-6 py-3 rounded-2xl border border-gray-100">
+                <Briefcase className="w-5 h-5 text-red-600" />
+                <div>
+                  <p className="text-xs text-gray-500 uppercase font-bold">Avg. Package</p>
+                  <p className="text-gray-900 font-bold">{course.salaryRange}</p>
+                </div>
+              </div>
+            </div>
+
+            <button className="bg-red-600 text-white px-12 py-5 rounded-2xl font-bold hover:bg-red-700 transition-all shadow-xl shadow-red-100 text-lg">
+              Enroll Now
+            </button>
+          </motion.div>
+
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="space-y-8"
+          >
+            <div className="bg-gray-50 p-8 lg:p-10 rounded-[40px] border border-gray-100">
+              <h2 className="text-2xl font-bold text-gray-900 mb-8 flex items-center gap-3">
+                <BookOpen className="w-6 h-6 text-red-600" />
+                Course Modules
+              </h2>
+              <div className="space-y-4">
+                {course.modules.map((module: string, i: number) => (
+                  <div key={i} className="flex items-center gap-4 p-4 bg-white rounded-2xl border border-gray-100 shadow-sm">
+                    <div className="w-8 h-8 bg-red-50 rounded-full flex items-center justify-center text-red-600 font-bold text-sm">
+                      {i + 1}
+                    </div>
+                    <span className="text-gray-700 font-medium">{module}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-gray-900 p-8 lg:p-10 rounded-[40px] text-white">
+              <h2 className="text-2xl font-bold mb-8 flex items-center gap-3">
+                <Rocket className="w-6 h-6 text-red-600" />
+                Learning Outcomes
+              </h2>
+              <div className="space-y-4 mb-12">
+                {course.outcomes.map((outcome: string, i: number) => (
+                  <div key={i} className="flex items-start gap-3">
+                    <CheckCircle2 className="w-6 h-6 text-green-500 flex-shrink-0" />
+                    <span className="text-gray-300">{outcome}</span>
+                  </div>
+                ))}
+              </div>
+
+              <h2 className="text-2xl font-bold mb-8 flex items-center gap-3">
+                <BriefcaseIcon className="w-6 h-6 text-red-600" />
+                Career Opportunities
+              </h2>
+              <div className="flex flex-wrap gap-3">
+                {course.opportunities.map((opp: string, i: number) => (
+                  <span key={i} className="bg-white/10 px-4 py-2 rounded-full text-sm font-medium text-gray-200 border border-white/10">
+                    {opp}
+                  </span>
+                ))}
+              </div>
+            </div>
+            
+            <div className="text-center pt-8">
+              <button className="bg-red-600 text-white px-12 py-5 rounded-2xl font-bold hover:bg-red-700 transition-all shadow-xl shadow-red-100 text-lg w-full">
+                Enroll Now
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const JobsPage = ({ onBack }: { onBack: () => void }) => {
+  const jobs = [
+    { title: "Senior Student Counselor", type: "Full-time", location: "Dhaka, BD", salary: "$1200 - $1800" },
+    { title: "Digital Marketing Executive", type: "Full-time", location: "Remote", salary: "$1000 - $1500" },
+    { title: "IT Support Specialist", type: "Full-time", location: "Dhaka, BD", salary: "$800 - $1200" },
+    { title: "Content Writer (Intern)", type: "Internship", location: "Remote", salary: "Stipend" },
+    { title: "Visa Processing Officer", type: "Full-time", location: "Dhaka, BD", salary: "$900 - $1400" },
+    { title: "UI/UX Designer (Intern)", type: "Internship", location: "Remote", salary: "Stipend" }
+  ];
+
+  return (
+    <div className="pt-32 pb-24 bg-gray-50 min-h-screen">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <button 
+          onClick={onBack}
+          className="flex items-center gap-2 text-red-600 font-bold mb-8 hover:gap-3 transition-all group"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          Back
+        </button>
+
+        <div className="text-center mb-16">
+          <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 mb-6">Current <span className="text-red-600">Vacancies</span></h1>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Join our mission to transform global education. We're looking for passionate individuals to join our growing team.
+          </p>
+        </div>
+
+        <div className="grid gap-6 max-w-5xl mx-auto">
+          {jobs.map((job, i) => (
+            <motion.div 
+              key={i}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              whileHover={{ y: -5, scale: 1.01 }}
+              transition={{ delay: i * 0.1 }}
+              className="bg-white p-6 lg:p-8 rounded-3xl border border-gray-100 shadow-sm hover:shadow-2xl transition-all flex flex-col md:flex-row md:items-center justify-between gap-6"
+            >
+              <div className="flex items-center gap-6">
+                <div className="w-14 h-14 bg-red-50 rounded-2xl flex items-center justify-center text-red-600">
+                  {job.type === 'Internship' ? <UserPlus className="w-7 h-7" /> : <Building2 className="w-7 h-7" />}
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-1">{job.title}</h3>
+                  <div className="flex flex-wrap gap-4 text-sm text-gray-500">
+                    <span className="flex items-center gap-1"><Clock className="w-4 h-4" /> {job.type}</span>
+                    <span className="flex items-center gap-1"><MapPin className="w-4 h-4" /> {job.location}</span>
+                    <span className="flex items-center gap-1 font-bold text-red-600">{job.salary}</span>
+                  </div>
+                </div>
+              </div>
+              <button className="bg-red-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-red-700 transition-all shadow-lg shadow-red-100 whitespace-nowrap">
+                Apply Now
+              </button>
+            </motion.div>
+          ))}
+        </div>
+
+        <div className="mt-20 text-center">
+          <p className="text-gray-500 mb-6">Don't see a role that fits? Send us your CV anyway!</p>
+          <button className="text-red-600 font-bold border-b-2 border-red-600 pb-1 hover:text-red-700 hover:border-red-700 transition-all">
+            careers@band9edu.com
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const TeamPage = ({ onBack }: { onBack: () => void }) => {
+  const team = [
+    { name: "MD Moudud Ahmed Misil", role: "Founder", image: "https://picsum.photos/seed/founder/400/400" },
+    { name: "Imran khan", role: "Director", image: "https://picsum.photos/seed/director1/400/400" },
+    { name: "Muqtar Ali", role: "Director", image: "https://picsum.photos/seed/director2/400/400" },
+    { name: "Md Millat Hosen", role: "TECH", image: "https://picsum.photos/seed/tech/400/400" },
+    { name: "Nuna Angbo", role: "language Trainer", image: "https://picsum.photos/seed/trainer/400/400" }
+  ];
+
+  return (
+    <div className="pt-32 pb-24 bg-gray-50 min-h-screen">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <button 
+          onClick={onBack}
+          className="flex items-center gap-2 text-red-600 font-bold mb-12 hover:gap-3 transition-all group"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          Back to Home
+        </button>
+
+        <div className="text-center mb-20">
+          <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 mb-6">Meet Our <span className="text-red-600">Team</span></h1>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">The dedicated professionals behind Band9 Edu, committed to your global success.</p>
+        </div>
+
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-12">
+          {team.map((member, i) => (
+            <motion.div 
+              key={i}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.1 }}
+              className="bg-white rounded-[40px] overflow-hidden shadow-xl hover:shadow-2xl transition-all group"
+            >
+              <div className="aspect-square overflow-hidden relative">
+                <img 
+                  src={member.image} 
+                  alt={member.name} 
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  referrerPolicy="no-referrer"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-8">
+                  <div className="flex gap-4">
+                    <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-red-600 transition-colors cursor-pointer">
+                      <Linkedin className="w-5 h-5" />
+                    </div>
+                    <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-red-600 transition-colors cursor-pointer">
+                      <Twitter className="w-5 h-5" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="p-8 text-center">
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">{member.name}</h3>
+                <p className="text-red-600 font-bold uppercase tracking-widest text-sm">{member.role}</p>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const InvestorsPage = ({ onBack }: { onBack: () => void }) => {
+  return (
+    <div className="pt-32 pb-24 bg-white min-h-screen">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <button 
+          onClick={onBack}
+          className="flex items-center gap-2 text-red-600 font-bold mb-12 hover:gap-3 transition-all group"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          Back to Home
+        </button>
+
+        <div className="text-center mb-20">
+          <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 mb-6">Investor <span className="text-red-600">Relations</span></h1>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">Partner with us as we redefine the future of global education and career development.</p>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-12 items-center mb-24">
+          <div className="space-y-6">
+            <h2 className="text-3xl font-bold text-gray-900">Why Invest in Band9 Edu?</h2>
+            <p className="text-lg text-gray-600">Band9 Edu is at the forefront of the rapidly growing international education market. Our innovative platform and personalized approach are transforming how students and professionals navigate their global careers.</p>
+            <div className="space-y-4">
+              {[
+                { title: "Market Leadership", desc: "Dominant presence in key emerging markets with high demand for global education." },
+                { title: "Scalable Technology", desc: "Proprietary AI-driven course matching and application management systems." },
+                { title: "High Growth Potential", desc: "Consistent year-over-year growth in student placements and revenue." }
+              ].map((item, i) => (
+                <div key={i} className="flex gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-red-50 flex items-center justify-center flex-shrink-0 text-red-600">
+                    <TrendingUp className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-gray-900">{item.title}</h3>
+                    <p className="text-gray-600">{item.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="relative">
+            <img 
+              src="https://picsum.photos/seed/invest/800/600" 
+              alt="Investors" 
+              className="rounded-[40px] shadow-2xl"
+              referrerPolicy="no-referrer"
+            />
+            <div className="absolute -bottom-6 -right-6 bg-red-600 text-white p-8 rounded-[30px] shadow-xl">
+              <p className="text-4xl font-bold mb-1">150%+</p>
+              <p className="text-sm font-medium opacity-80 uppercase tracking-widest">Annual Growth</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-gray-900 rounded-[40px] p-12 text-center text-white">
+          <h2 className="text-3xl font-bold mb-6">Interested in Partnering?</h2>
+          <p className="text-xl text-gray-400 mb-10 max-w-2xl mx-auto">Contact our investor relations team for more information about investment opportunities and our strategic roadmap.</p>
+          <button className="bg-red-600 text-white px-10 py-4 rounded-2xl font-bold hover:bg-red-700 transition-all">
+            Contact Investor Relations
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const AccommodationPage = ({ onBack }: { onBack: () => void }) => {
+  const [filters, setFilters] = useState({
+    country: '',
+    university: '',
+    priceRange: ''
+  });
+
+  const accommodations = [
+    { id: 1, name: "Oxford Student Village", country: "UK", university: "University of Oxford", price: 180, image: "https://picsum.photos/seed/acc1/800/600", type: "En-suite" },
+    { id: 2, name: "Cambridge Heights", country: "UK", university: "University of Cambridge", price: 220, image: "https://picsum.photos/seed/acc2/800/Cam", type: "Studio" },
+    { id: 3, name: "Harvard Square Apartments", country: "USA", university: "Harvard University", price: 350, image: "https://picsum.photos/seed/acc3/800/600", type: "Shared Flat" },
+    { id: 4, name: "Toronto Campus Living", country: "CANADA", university: "University of Toronto", price: 280, image: "https://picsum.photos/seed/acc4/800/600", type: "En-suite" },
+    { id: 5, name: "Sydney Harbour Stay", country: "AUSTRALIA", university: "University of Sydney", price: 310, image: "https://picsum.photos/seed/acc5/800/600", type: "Studio" },
+    { id: 6, name: "Berlin Student Hub", country: "GERMANY", university: "Humboldt University", price: 150, image: "https://picsum.photos/seed/acc6/800/600", type: "Shared Room" },
+    { id: 7, name: "London Bridge Residence", country: "UK", university: "King's College London", price: 250, image: "https://picsum.photos/seed/acc7/800/600", type: "En-suite" },
+    { id: 8, name: "NYC Scholar House", country: "USA", university: "Columbia University", price: 400, image: "https://picsum.photos/seed/acc8/800/600", type: "Studio" },
+    { id: 9, name: "Melbourne City Stay", country: "AUSTRALIA", university: "University of Melbourne", price: 290, image: "https://picsum.photos/seed/acc9/800/600", type: "En-suite" },
+  ];
+
+  const filteredAccommodations = accommodations.filter(acc => {
+    return (filters.country === '' || acc.country === filters.country) &&
+           (filters.university === '' || acc.university.toLowerCase().includes(filters.university.toLowerCase())) &&
+           (filters.priceRange === '' || (
+             filters.priceRange === 'low' ? acc.price < 200 :
+             filters.priceRange === 'mid' ? (acc.price >= 200 && acc.price <= 300) :
+             acc.price > 300
+           ));
+  });
+
+  return (
+    <div className="pt-32 pb-24 bg-gray-50 min-h-screen">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <button 
+          onClick={onBack}
+          className="flex items-center gap-2 text-red-600 font-bold mb-12 hover:gap-3 transition-all group"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          Back to Home
+        </button>
+
+        <div className="text-center mb-16">
+          <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 mb-6">Student <span className="text-red-600">Accommodation</span></h1>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">Find your perfect home away from home with our curated student housing options.</p>
+        </div>
+
+        {/* Filter Board */}
+        <div className="bg-white p-8 rounded-[32px] shadow-xl border border-gray-100 mb-16">
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-gray-700 uppercase tracking-wider">Country</label>
+              <div className="relative">
+                <Globe className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <select 
+                  className="w-full pl-12 pr-4 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-red-600 outline-none appearance-none"
+                  value={filters.country}
+                  onChange={(e) => setFilters({...filters, country: e.target.value})}
+                >
+                  <option value="">All Countries</option>
+                  <option value="UK">United Kingdom</option>
+                  <option value="USA">USA</option>
+                  <option value="CANADA">Canada</option>
+                  <option value="AUSTRALIA">Australia</option>
+                  <option value="GERMANY">Germany</option>
+                </select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-gray-700 uppercase tracking-wider">University</label>
+              <div className="relative">
+                <School className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input 
+                  type="text"
+                  placeholder="Search by university..."
+                  className="w-full pl-12 pr-4 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-red-600 outline-none"
+                  value={filters.university}
+                  onChange={(e) => setFilters({...filters, university: e.target.value})}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-gray-700 uppercase tracking-wider">Price Range</label>
+              <div className="relative">
+                <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <select 
+                  className="w-full pl-12 pr-4 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-red-600 outline-none appearance-none"
+                  value={filters.priceRange}
+                  onChange={(e) => setFilters({...filters, priceRange: e.target.value})}
+                >
+                  <option value="">All Prices</option>
+                  <option value="low">Under $200 / week</option>
+                  <option value="mid">$200 - $300 / week</option>
+                  <option value="high">Above $300 / week</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Results */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {filteredAccommodations.map((acc) => (
+            <motion.div 
+              key={acc.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white rounded-[40px] overflow-hidden shadow-lg hover:shadow-2xl transition-all group border border-gray-100"
+            >
+              <div className="aspect-[4/3] overflow-hidden relative">
+                <img 
+                  src={acc.image} 
+                  alt={acc.name} 
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  referrerPolicy="no-referrer"
+                />
+                <div className="absolute top-6 right-6 bg-white/90 backdrop-blur-md px-4 py-2 rounded-full font-bold text-red-600 shadow-lg">
+                  ${acc.price}/wk
+                </div>
+              </div>
+              <div className="p-8">
+                <div className="flex items-center gap-2 text-red-600 font-bold text-xs uppercase tracking-widest mb-3">
+                  <MapPin className="w-3 h-3" />
+                  {acc.country}
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">{acc.name}</h3>
+                <p className="text-gray-600 mb-6 flex items-center gap-2">
+                  <School className="w-4 h-4" />
+                  {acc.university}
+                </p>
+                <div className="flex items-center justify-between pt-6 border-t border-gray-100">
+                  <span className="text-sm font-medium text-gray-500">{acc.type}</span>
+                  <button className="flex items-center gap-2 text-red-600 font-bold hover:gap-3 transition-all">
+                    Contact Agent <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+        
+        {filteredAccommodations.length === 0 && (
+          <div className="text-center py-20">
+            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6 text-gray-400">
+              <Search className="w-10 h-10" />
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">No results found</h3>
+            <p className="text-gray-600">Try adjusting your filters to find more options.</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 const Navbar = ({ onNavigate }: { onNavigate: (page: string, param?: string) => void }) => {
   const [isDestOpen, setIsDestOpen] = useState(false);
   const [isServicesOpen, setIsServicesOpen] = useState(false);
   const [isLangOpen, setIsLangOpen] = useState(false);
+  const [isResourcesOpen, setIsResourcesOpen] = useState(false);
+  const [isCareerOpen, setIsCareerOpen] = useState(false);
+  const [isCompanyOpen, setIsCompanyOpen] = useState(false);
 
   const countries = [
     "UK", "USA", "CANADA", "AUSTRALIA", "GERMANY", "IRELAND", "FRANCE", "ITALY", "DUBAI", "ESTONIA", 
@@ -192,12 +1585,12 @@ const Navbar = ({ onNavigate }: { onNavigate: (page: string, param?: string) => 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex h-20 items-center">
-          <div className="flex items-center gap-2 cursor-pointer mr-8 flex-shrink-0" onClick={() => onNavigate('home')}>
+        <div className="flex h-20 items-center gap-6">
+          <div className="flex items-center gap-2 cursor-pointer mr-2 flex-shrink-0" onClick={() => onNavigate('home')}>
             <img src="/logo.png" alt="Band9 Edu Logo" className="h-10 w-auto object-contain" referrerPolicy="no-referrer" />
             <span className="text-xl font-bold tracking-tight text-gray-900">Band9 <span className="text-red-600">Edu</span></span>
           </div>
-          <div className="hidden lg:flex items-center gap-4 flex-1">
+          <div className="hidden lg:flex items-center gap-3 flex-1">
             <div 
               className="relative flex items-center gap-1 cursor-pointer group py-4"
               onMouseEnter={() => setIsDestOpen(true)}
@@ -347,27 +1740,175 @@ const Navbar = ({ onNavigate }: { onNavigate: (page: string, param?: string) => 
                 )}
               </AnimatePresence>
             </div>
-            <div className="flex items-center gap-1 cursor-pointer group">
-              <span className="text-[14px] font-medium text-gray-800 group-hover:text-red-600 transition-colors whitespace-nowrap">Resources</span>
-              <ChevronDown className="w-3.5 h-3.5 text-gray-500 group-hover:text-red-600 transition-colors" />
-            </div>
-            <a 
-              href="#" 
-              onClick={(e) => {
-                e.preventDefault();
-                onNavigate('services');
-              }} 
-              className="text-[14px] font-medium text-gray-800 hover:text-red-600 transition-colors whitespace-nowrap"
+            <div 
+              className="relative flex items-center gap-1 cursor-pointer group py-4"
+              onMouseEnter={() => setIsResourcesOpen(true)}
+              onMouseLeave={() => setIsResourcesOpen(false)}
+              onClick={() => {
+                onNavigate('scholarships');
+                setIsResourcesOpen(false);
+              }}
             >
-              Career
-            </a>
-            <div className="flex items-center gap-1 cursor-pointer group">
-              <span className="text-[14px] font-medium text-gray-800 group-hover:text-red-600 transition-colors whitespace-nowrap">Company</span>
-              <ChevronDown className="w-3.5 h-3.5 text-gray-500 group-hover:text-red-600 transition-colors" />
+              <span className="text-[14px] font-medium text-gray-800 group-hover:text-red-600 transition-colors whitespace-nowrap">Resources</span>
+              <ChevronDown className={`w-3.5 h-3.5 text-gray-500 group-hover:text-red-600 transition-colors transform transition-transform ${isResourcesOpen ? 'rotate-180' : ''}`} />
+              
+              <AnimatePresence>
+                {isResourcesOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    className="absolute top-full left-0 w-[200px] bg-white rounded-2xl shadow-2xl border border-gray-100 p-4 z-[60] mt-1"
+                  >
+                    <div className="flex flex-col gap-1">
+                      <div 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onNavigate('scholarships');
+                          setIsResourcesOpen(false);
+                        }}
+                        className="flex items-center gap-3 p-3 rounded-lg hover:bg-red-50 group/item transition-all cursor-pointer"
+                      >
+                        <span className="text-sm text-gray-600 group-hover/item:text-red-600 font-medium">Scholarships</span>
+                      </div>
+                      <div 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onNavigate('study-guides');
+                          setIsResourcesOpen(false);
+                        }}
+                        className="flex items-center gap-3 p-3 rounded-lg hover:bg-red-50 group/item transition-all cursor-pointer"
+                      >
+                        <span className="text-sm text-gray-600 group-hover/item:text-red-600 font-medium">Study Guides</span>
+                      </div>
+                      <div 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onNavigate('student-blogs');
+                          setIsResourcesOpen(false);
+                        }}
+                        className="flex items-center gap-3 p-3 rounded-lg hover:bg-red-50 group/item transition-all cursor-pointer"
+                      >
+                        <span className="text-sm text-gray-600 group-hover/item:text-red-600 font-medium">Student Blogs</span>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
-            <a href="#" onClick={() => onNavigate('home')} className="text-[14px] font-medium text-gray-800 hover:text-red-600 transition-colors whitespace-nowrap">Accommodation</a>
+            <div 
+              className="relative flex items-center gap-1 cursor-pointer group py-4"
+              onMouseEnter={() => setIsCareerOpen(true)}
+              onMouseLeave={() => setIsCareerOpen(false)}
+              onClick={() => {
+                onNavigate('career');
+                setIsCareerOpen(false);
+              }}
+            >
+              <span className="text-[14px] font-medium text-gray-800 group-hover:text-red-600 transition-colors whitespace-nowrap">Career</span>
+              <ChevronDown className={`w-3.5 h-3.5 text-gray-500 group-hover:text-red-600 transition-colors transform transition-transform ${isCareerOpen ? 'rotate-180' : ''}`} />
+              
+              <AnimatePresence>
+                {isCareerOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    className="absolute top-full left-0 w-[200px] bg-white rounded-2xl shadow-2xl border border-gray-100 p-4 z-[60] mt-1"
+                  >
+                    <div className="flex flex-col gap-1">
+                      <div 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onNavigate('training');
+                          setIsCareerOpen(false);
+                        }}
+                        className="flex items-center gap-3 p-3 rounded-lg hover:bg-red-50 group/item transition-all cursor-pointer"
+                      >
+                        <span className="text-sm text-gray-600 group-hover/item:text-red-600 font-medium">Training</span>
+                      </div>
+                      <div 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onNavigate('jobs');
+                          setIsCareerOpen(false);
+                        }}
+                        className="flex items-center gap-3 p-3 rounded-lg hover:bg-red-50 group/item transition-all cursor-pointer"
+                      >
+                        <span className="text-sm text-gray-600 group-hover/item:text-red-600 font-medium">Jobs</span>
+                      </div>
+                      <div className="h-px bg-gray-100 my-2" />
+                      <div 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onNavigate('career');
+                          setIsCareerOpen(false);
+                        }}
+                        className="flex items-center justify-between p-3 rounded-lg hover:bg-red-50 group/item transition-all cursor-pointer"
+                      >
+                        <span className="text-sm font-bold text-red-600">EXPLORE ALL</span>
+                        <ArrowRight className="w-4 h-4 text-red-600" />
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+            <div 
+              className="relative flex items-center gap-1 cursor-pointer group py-4"
+              onMouseEnter={() => setIsCompanyOpen(true)}
+              onMouseLeave={() => setIsCompanyOpen(false)}
+            >
+              <span className="text-[14px] font-medium text-gray-800 group-hover:text-red-600 transition-colors whitespace-nowrap">Company</span>
+              <ChevronDown className={`w-3.5 h-3.5 text-gray-500 group-hover:text-red-600 transition-colors transform transition-transform ${isCompanyOpen ? 'rotate-180' : ''}`} />
+              
+              <AnimatePresence>
+                {isCompanyOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    className="absolute top-full left-0 w-[200px] bg-white rounded-2xl shadow-2xl border border-gray-100 p-4 z-[60] mt-1"
+                  >
+                    <div className="flex flex-col gap-1">
+                      <div 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onNavigate('about');
+                          setIsCompanyOpen(false);
+                        }}
+                        className="flex items-center gap-3 p-3 rounded-lg hover:bg-red-50 group/item transition-all cursor-pointer"
+                      >
+                        <span className="text-sm text-gray-600 group-hover/item:text-red-600 font-medium">About</span>
+                      </div>
+                      <div 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onNavigate('team');
+                          setIsCompanyOpen(false);
+                        }}
+                        className="flex items-center gap-3 p-3 rounded-lg hover:bg-red-50 group/item transition-all cursor-pointer"
+                      >
+                        <span className="text-sm text-gray-600 group-hover/item:text-red-600 font-medium">Team</span>
+                      </div>
+                      <div 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onNavigate('investors');
+                          setIsCompanyOpen(false);
+                        }}
+                        className="flex items-center gap-3 p-3 rounded-lg hover:bg-red-50 group/item transition-all cursor-pointer"
+                      >
+                        <span className="text-sm text-gray-600 group-hover/item:text-red-600 font-medium">Investors</span>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+            <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('accommodation'); }} className="text-[13px] xl:text-[14px] font-medium text-gray-800 hover:text-red-600 transition-colors whitespace-nowrap">Accommodation</a>
           </div>
-          <button className="hidden lg:flex bg-red-600 text-white px-5 py-2.5 rounded-xl text-[14px] font-bold hover:bg-red-700 transition-all items-center gap-2 ml-auto flex-shrink-0">
+          <button className="hidden lg:flex bg-red-600 text-white px-5 py-2.5 rounded-xl text-[13px] xl:text-[14px] font-bold hover:bg-red-700 transition-all items-center gap-2 ml-12 flex-shrink-0">
             Book free counselling <ArrowRight className="w-4 h-4" />
           </button>
         </div>
@@ -511,8 +2052,8 @@ const Services = () => {
           {servicesData.map((s, i) => (
             <motion.div 
               key={i}
-              whileHover={{ y: -5 }}
-              className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-xl transition-all group"
+              whileHover={{ y: -10, scale: 1.02 }}
+              className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-2xl transition-all group"
             >
               <div className="w-16 h-16 bg-red-50 rounded-xl flex items-center justify-center text-red-600 mb-6 group-hover:bg-red-600 group-hover:text-white transition-colors">
                 {s.icon}
@@ -1342,6 +2883,7 @@ const ServicesPage = ({ onBack }: { onBack: () => void }) => {
               key={service.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
+              whileHover={{ y: -10, scale: 1.02 }}
               transition={{ delay: i * 0.1 }}
               className="bg-white p-10 rounded-3xl shadow-sm border border-gray-100 hover:shadow-2xl transition-all group"
             >
@@ -1562,6 +3104,73 @@ const About = () => {
   );
 };
 
+const testimonialsData = [
+  {
+    name: "Sarah Jenkins",
+    course: "MSc Data Science",
+    country: "United Kingdom",
+    image: "https://picsum.photos/seed/sarah/150/150",
+    quote: "Band9 Edu made my dream of studying in the UK a reality. Their guidance through the university selection and visa process was invaluable."
+  },
+  {
+    name: "Ahmed Khan",
+    course: "MBA",
+    country: "Canada",
+    image: "https://picsum.photos/seed/ahmed/150/150",
+    quote: "The personalized counseling I received was exceptional. They helped me secure a partial scholarship and guided me every step of the way."
+  },
+  {
+    name: "Elena Rodriguez",
+    course: "BSc Computer Science",
+    country: "Australia",
+    image: "https://picsum.photos/seed/elena/150/150",
+    quote: "From IELTS preparation to my final visa approval, the team at Band9 Edu was supportive, professional, and highly knowledgeable."
+  }
+];
+
+const Testimonials = () => {
+  return (
+    <section className="py-24 bg-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center max-w-3xl mx-auto mb-16">
+          <h2 className="text-4xl font-bold text-gray-900 mb-6 tracking-tight">Student Success Stories</h2>
+          <p className="text-xl text-gray-600">Hear from our students who have successfully achieved their study abroad dreams with our guidance.</p>
+        </div>
+        
+        <div className="grid md:grid-cols-3 gap-8">
+          {testimonialsData.map((testimonial, index) => (
+            <motion.div 
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.1 }}
+              className="bg-gray-50 p-8 rounded-2xl border border-gray-100 relative"
+            >
+              <div className="absolute -top-6 left-8">
+                <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center text-white">
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
+                  </svg>
+                </div>
+              </div>
+              <p className="text-gray-600 italic mb-6 mt-4">"{testimonial.quote}"</p>
+              <div className="flex items-center gap-4">
+                <img src={testimonial.image} alt={testimonial.name} className="w-12 h-12 rounded-full object-cover" referrerPolicy="no-referrer" />
+                <div>
+                  <h4 className="font-bold text-gray-900">{testimonial.name}</h4>
+                  <p className="text-sm text-gray-500">{testimonial.course}</p>
+                  <p className="text-sm text-red-600 font-medium">{testimonial.country}</p>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
 const Contact = () => {
   return (
     <section id="contact" className="py-24 bg-gray-50">
@@ -1745,7 +3354,16 @@ const Footer = ({ onNavigate }: { onNavigate: (page: string) => void }) => {
               <li><a href="#" onClick={(e) => { e.preventDefault(); onNavigate('services'); }} className="hover:text-red-600 transition-colors">Language Preparation</a></li>
               <li><a href="#" onClick={(e) => { e.preventDefault(); onNavigate('services'); }} className="hover:text-red-600 transition-colors">Academic Assistance</a></li>
               <li><a href="#" onClick={(e) => { e.preventDefault(); onNavigate('services'); }} className="hover:text-red-600 transition-colors">IT & Digital Learning</a></li>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); onNavigate('services'); }} className="hover:text-red-600 transition-colors">Career Guidance</a></li>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); onNavigate('career'); }} className="hover:text-red-600 transition-colors">Career Guidance</a></li>
+            </ul>
+          </div>
+          <div>
+            <h5 className="font-bold text-gray-900 mb-6">Resources</h5>
+            <ul className="space-y-4 text-sm text-gray-500">
+              <li><a href="#" onClick={(e) => { e.preventDefault(); onNavigate('scholarships'); }} className="hover:text-red-600 transition-colors">Scholarships</a></li>
+              <li><a href="#" className="hover:text-red-600 transition-colors">Study Guides</a></li>
+              <li><a href="#" className="hover:text-red-600 transition-colors">Visa Requirements</a></li>
+              <li><a href="#" className="hover:text-red-600 transition-colors">Student Blogs</a></li>
             </ul>
           </div>
           <div>
@@ -1772,17 +3390,192 @@ const Footer = ({ onNavigate }: { onNavigate: (page: string) => void }) => {
 
 // --- Main App ---
 
+const studyGuidesData = [
+  {
+    title: "The Ultimate Guide to Studying in the UK",
+    description: "Everything you need to know about universities, visas, and living in the UK.",
+    image: "https://picsum.photos/seed/ukguide/400/300",
+    date: "March 2024",
+    readTime: "10 min read"
+  },
+  {
+    title: "Navigating the US College Admissions Process",
+    description: "A step-by-step breakdown of applications, essays, and standardized tests.",
+    image: "https://picsum.photos/seed/usguide/400/300",
+    date: "February 2024",
+    readTime: "15 min read"
+  },
+  {
+    title: "Australia: A Student's Paradise",
+    description: "Discover the best cities, universities, and lifestyle tips for studying down under.",
+    image: "https://picsum.photos/seed/ausguide/400/300",
+    date: "January 2024",
+    readTime: "8 min read"
+  }
+];
+
+const StudyGuidesPage = ({ onBack }: { onBack: () => void }) => {
+  return (
+    <div className="pt-24 pb-16 bg-gray-50 min-h-screen">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <button 
+          onClick={onBack}
+          className="flex items-center gap-2 text-gray-600 hover:text-red-600 transition-colors mb-8"
+        >
+          <ArrowLeft className="w-4 h-4" /> Back to Home
+        </button>
+        
+        <div className="mb-12">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">Study Guides</h1>
+          <p className="text-xl text-gray-600 max-w-3xl">Comprehensive resources to help you plan your international education journey.</p>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-8">
+          {studyGuidesData.map((guide, index) => (
+            <motion.div 
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+              className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-xl transition-all group cursor-pointer"
+            >
+              <div className="h-48 overflow-hidden">
+                <img src={guide.image} alt={guide.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" referrerPolicy="no-referrer" />
+              </div>
+              <div className="p-6">
+                <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
+                  <span>{guide.date}</span>
+                  <span>•</span>
+                  <span>{guide.readTime}</span>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-red-600 transition-colors">{guide.title}</h3>
+                <p className="text-gray-600 mb-4 line-clamp-2">{guide.description}</p>
+                <div className="flex items-center gap-2 text-red-600 font-medium">
+                  Read Guide <ArrowRight className="w-4 h-4" />
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const studentBlogsData = [
+  {
+    title: "My First Month in Toronto: Expectations vs Reality",
+    author: "Ahmed Khan",
+    university: "University of Toronto",
+    image: "https://picsum.photos/seed/blog1/400/300",
+    date: "March 1, 2024",
+    category: "Student Life"
+  },
+  {
+    title: "How I Managed My Finances While Studying in London",
+    author: "Sarah Jenkins",
+    university: "UCL",
+    image: "https://picsum.photos/seed/blog2/400/300",
+    date: "February 28, 2024",
+    category: "Finance"
+  },
+  {
+    title: "Top 5 Tips for Acing the IELTS Speaking Test",
+    author: "Elena Rodriguez",
+    university: "University of Melbourne",
+    image: "https://picsum.photos/seed/blog3/400/300",
+    date: "February 15, 2024",
+    category: "Preparation"
+  }
+];
+
+const StudentBlogsPage = ({ onBack }: { onBack: () => void }) => {
+  return (
+    <div className="pt-24 pb-16 bg-gray-50 min-h-screen">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <button 
+          onClick={onBack}
+          className="flex items-center gap-2 text-gray-600 hover:text-red-600 transition-colors mb-8"
+        >
+          <ArrowLeft className="w-4 h-4" /> Back to Home
+        </button>
+        
+        <div className="mb-12">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">Student Blogs</h1>
+          <p className="text-xl text-gray-600 max-w-3xl">Real stories, tips, and experiences from students studying abroad.</p>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-8">
+          {studentBlogsData.map((blog, index) => (
+            <motion.div 
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+              className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-xl transition-all group cursor-pointer"
+            >
+              <div className="h-48 overflow-hidden relative">
+                <img src={blog.image} alt={blog.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" referrerPolicy="no-referrer" />
+                <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-red-600">
+                  {blog.category}
+                </div>
+              </div>
+              <div className="p-6">
+                <div className="text-sm text-gray-500 mb-3">{blog.date}</div>
+                <h3 className="text-xl font-bold text-gray-900 mb-4 group-hover:text-red-600 transition-colors line-clamp-2">{blog.title}</h3>
+                <div className="flex items-center gap-3 pt-4 border-t border-gray-100">
+                  <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-red-600 font-bold text-sm">
+                    {blog.author.charAt(0)}
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">{blog.author}</p>
+                    <p className="text-xs text-gray-500">{blog.university}</p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default function App() {
   const [currentPage, setCurrentPage] = useState('home');
+  const [previousPage, setPreviousPage] = useState('home');
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
   const [selectedExam, setSelectedExam] = useState<string | null>(null);
+  const [selectedScholarship, setSelectedScholarship] = useState<string | null>(null);
+  const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
 
   const handleNavigate = (page: string, param?: string) => {
+    if (page === 'about') {
+      if (currentPage !== 'home') {
+        setCurrentPage('home');
+        setTimeout(() => {
+          const element = document.getElementById('about');
+          if (element) element.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+      } else {
+        const element = document.getElementById('about');
+        if (element) element.scrollIntoView({ behavior: 'smooth' });
+      }
+      return;
+    }
+
+    if (page !== currentPage) {
+      setPreviousPage(currentPage);
+    }
     setCurrentPage(page);
     if (page === 'country-study') {
       setSelectedCountry(param || null);
     } else if (page === 'language-prep') {
       setSelectedExam(param || null);
+    } else if (page === 'scholarship-detail') {
+      setSelectedScholarship(param || null);
+    } else if (page === 'course-details') {
+      setSelectedCourse(param || null);
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -1800,6 +3593,7 @@ export default function App() {
               onSeeAll={() => handleNavigate('destinations')} 
               onNavigate={handleNavigate}
             />
+            <Testimonials />
             <Contact />
           </>
         ) : currentPage === 'destinations' ? (
@@ -1819,6 +3613,34 @@ export default function App() {
             country={selectedCountry || 'UK'} 
             onBack={() => handleNavigate('home')} 
           />
+        ) : currentPage === 'scholarships' ? (
+          <ScholarshipsPage 
+            onBack={() => handleNavigate(previousPage)} 
+            onNavigate={handleNavigate}
+          />
+        ) : currentPage === 'scholarship-detail' ? (
+          <ScholarshipDetailPage 
+            slug={selectedScholarship || ''} 
+            onBack={() => handleNavigate('scholarships')} 
+          />
+        ) : currentPage === 'career' ? (
+          <CareerPage onNavigate={handleNavigate} onBack={() => handleNavigate('home')} />
+        ) : currentPage === 'training' ? (
+          <TrainingPage onNavigate={handleNavigate} onBack={() => handleNavigate('career')} />
+        ) : currentPage === 'course-details' ? (
+          <CourseDetailsPage courseTitle={selectedCourse || ""} onBack={() => handleNavigate('training')} />
+        ) : currentPage === 'jobs' ? (
+          <JobsPage onBack={() => handleNavigate('career')} />
+        ) : currentPage === 'team' ? (
+          <TeamPage onBack={() => handleNavigate('home')} />
+        ) : currentPage === 'investors' ? (
+          <InvestorsPage onBack={() => handleNavigate('home')} />
+        ) : currentPage === 'accommodation' ? (
+          <AccommodationPage onBack={() => handleNavigate('home')} />
+        ) : currentPage === 'study-guides' ? (
+          <StudyGuidesPage onBack={() => handleNavigate('home')} />
+        ) : currentPage === 'student-blogs' ? (
+          <StudentBlogsPage onBack={() => handleNavigate('home')} />
         ) : (
           <CourseFinderPage onBack={() => handleNavigate('home')} />
         )}
